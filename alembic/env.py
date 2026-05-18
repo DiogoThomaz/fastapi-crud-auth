@@ -1,0 +1,1 @@
+# Alembic opcional - placeholder para MVP
