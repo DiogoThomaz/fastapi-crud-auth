@@ -1,16 +1,15 @@
 import logging
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from app.api.routes import auth, items
-from app.core.config import settings
 from app.db.session import engine
-from app.models.item import Item
+from app.models.item import Item  # noqa: F401
 from app.models.user import Base
 from app.middleware.logging_middleware import RequestLoggingMiddleware
-
+from app.core.config import settings
 
 logging.basicConfig(level=getattr(logging, settings.LOG_LEVEL, logging.INFO))
 
@@ -26,7 +25,7 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     def on_startup():
-        # MVP: cria tabelas automaticamente (poderia usar Alembic depois)
+        # MVP: cria tabelas automaticamente (para Postgres, depois migra para Alembic)
         Base.metadata.create_all(bind=engine)
 
     app.include_router(auth.router)
