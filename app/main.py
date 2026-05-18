@@ -1,15 +1,17 @@
 import logging
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.api.routes import auth, items
-from app.db.session import engine
-from app.models.item import Item  # noqa: F401
-from app.models.user import Base  # noqa: F401
-from app.middleware.logging_middleware import RequestLoggingMiddleware
 from app.core.config import settings
+from app.db.session import engine
+from app.middleware.logging_middleware import RequestLoggingMiddleware
+
+# Garantir que os modelos sejam importados (para criação de tabelas no MVP)
+from app.models import item as _item  # noqa: F401
+from app.models.user import Base
 
 logging.basicConfig(level=getattr(logging, settings.LOG_LEVEL, logging.INFO))
 
@@ -21,7 +23,7 @@ def create_app() -> FastAPI:
     app.add_middleware(RequestLoggingMiddleware)
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    async def validation_exception_handler(request, exc: RequestValidationError):
         return JSONResponse(status_code=422, content={"detail": exc.errors()})
 
     @app.on_event("startup")
