@@ -20,6 +20,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         sub = payload.get("sub")
         if not sub:
             raise credentials_exception
+    except HTTPException:
+        raise
     except Exception:
         raise credentials_exception
 
@@ -27,7 +29,6 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     try:
         user = db.query(User).filter(User.email == sub).first()
         if not user:
-            # token válido mas usuário inexistente
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User not found")
         return user
     finally:
